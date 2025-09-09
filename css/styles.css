@@ -12,8 +12,8 @@
     box-sizing: border-box;
 
     /* Debug */
-    outline: 2px solid red;
-    font-size: 1.5rem;
+    /* outline: 2px solid red;
+    font-size: 1.5rem; */
 }
 
 html,
@@ -86,3 +86,37 @@ p {
 }
 
 /* #endregion */
+
+h1 {
+    font-size: 2rem;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    margin-bottom: 2rem;
+    margin-top: 1rem
+}
+
+.library-table {
+    margin: auto;
+    border-collapse: collapse;
+}
+
+.library-table caption {
+    margin-bottom: 0.5rem;
+}
+
+.library-head-cell {
+    font-size: 1.4rem;
+    border: 2px solid black;
+}
+
+
+.library-cell {
+    font-size: 1.1rem;
+    text-align: center;
+    border: 1px solid black;
+}
+
+.library-cell,
+.library-head-cell {
+    padding: 0.75rem;
+}
