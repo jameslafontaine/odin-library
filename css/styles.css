@@ -109,6 +109,9 @@ h1 {
     border: 2px solid black;
 }
 
+col {
+    min-width: 11rem;
+}
 
 .library-cell {
     font-size: 1.1rem;
@@ -119,4 +122,15 @@ h1 {
 .library-cell,
 .library-head-cell {
     padding: 0.75rem;
+}
+
+.new-book-cell {
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.toggle-read-btn,
+.delete-book-btn {
+    margin-left: 1rem;
 }

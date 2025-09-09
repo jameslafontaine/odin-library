@@ -1,4 +1,10 @@
 // =================
+// Constants
+// =================
+const HAS_READ = "already been read";
+const NOT_READ = "not read yet";
+
+// =================
 // Utility Functions
 // =================
 
@@ -17,10 +23,17 @@ function generateUUID() {
 // -----------
 // DOM Helpers
 // -----------
-function createElement(tag, classNames = []) {
+function createElement(tag, classNames = [], textContent = "") {
     const el = document.createElement(tag);
     classNames.forEach(cls => el.classList.add(cls));
+    el.textContent = textContent;
     return el;
+}
+
+function createButton(classNames = [], textContent = "", onClick) {
+    const btn = createElement("button", classNames, textContent)
+    btn.addEventListener("click", onClick);
+    return btn;
 }
 
 // =================
@@ -37,7 +50,11 @@ function Book(id, title, author, pages, readValue) {
     this.author = author;
     this.pages = pages;
     // map the string to a more user-friendly representation
-    this.read = readValue === "not-read" ? "not read yet" : "already been read";
+    this.read = readValue === "not-read" ? NOT_READ : HAS_READ;
+}
+
+Book.prototype.toggleRead = function () {
+    this.read === NOT_READ ? this.read = HAS_READ : this.read = NOT_READ;
 }
 
 Book.prototype.info = function () {
@@ -65,6 +82,15 @@ function displayAllBooks() {
     }
 }
 
+function removeBookFromLibrary(id) {
+    for (let i in myLibrary) {
+        if (myLibrary[i].id === id) {
+            myLibrary.splice(i, 1);
+            removeTableRow(id);
+        }
+    }
+}
+
 // =================
 // DOM Manipulation Functions
 // =================
@@ -72,7 +98,10 @@ function displayAllBooks() {
 function populateTableColGroup(obj, colgroup) {
 
     // Populate the table colgroup with a number of columns corresponding to the number of book properties
-    Object.keys(obj).forEach(() => colgroup.appendChild(createElement("col")));
+    Object.keys(obj).forEach((key) => colgroup.appendChild(createElement("col", [`${key}-column`])));
+
+    // Append extra column for the action buttons
+    colgroup.appendChild(createElement("col", ["action-column"]));
 }
 
 function addTableHeader(obj, thead) {
@@ -82,26 +111,62 @@ function addTableHeader(obj, thead) {
     let newCell = undefined;
 
     for (let key of Object.keys(obj)) {
-        newCell = createElement("th", ["library-head-cell"]);
+        newCell = createElement("th", ["library-head-cell"], capitalizeFirstLetter(key));
         newCell.setAttribute("scope", "col");
-        newCell.textContent = capitalizeFirstLetter(key);
         newRow.appendChild(newCell);
     }
+
+    // Append extra cell for the action buttons
+    newCell = createElement("th");
+    newCell.setAttribute("scope", "col");
+    newRow.appendChild(newCell);
 
     thead.appendChild(newRow);
 }
 
 function addTableRow(obj, tbody) {
     const newRow = createElement("tr", ["library-record"]);
+    newRow.setAttribute("data-id", obj.id);
     let newCell = undefined;
 
-    for (let value of Object.values(obj)) {
-        newCell = createElement("td", ["library-cell"]);
-        newCell.textContent = value;
+    for (let [key, value] of Object.entries(obj)) {
+        newCell = createElement("td", [`${key}-cell`, "library-cell"], value);
         newRow.appendChild(newCell);
     }
 
+    // Append extra cell for the action buttons and set up event listeners
+    newCell = createElement("td", ["action-cell"]);
+
+    const toggleReadButton = createButton(
+        ["toggle-read-btn"],
+        "Toggle Read",
+        () => {
+            obj.toggleRead();
+            updateTableCell(obj, "read");
+        }
+    );
+
+    const deleteBookButton = createButton(
+        ["delete-book-btn"],
+        "Delete Book",
+        () => removeBookFromLibrary(obj.id)
+    );
+
+    newCell.appendChild(toggleReadButton);
+    newCell.appendChild(deleteBookButton);
+    newRow.appendChild(newCell);
+
     tbody.appendChild(newRow);
+}
+
+function updateTableCell(obj, colName) {
+    const rowToUpdate = document.querySelector(`[data-id="${obj.id}"]`);
+    rowToUpdate.querySelector(`.${colName}-cell`).textContent = obj[`${colName}`];
+}
+
+function removeTableRow(id) {
+    const recordToRemove = document.querySelector(`[data-id="${id}"]`);
+    recordToRemove.remove();
 }
 
 // =================
@@ -148,4 +213,5 @@ form.addEventListener("submit", (event) => {
     form.reset();
     newBookDialog.close();
 
-}); 
+});
+
