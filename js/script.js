@@ -1,9 +1,4 @@
 // =================
-// Data / State
-// =================
-const myLibrary = [];
-
-// =================
 // Utility Functions
 // =================
 
@@ -32,7 +27,7 @@ function createElement(tag, classNames = []) {
 // Objects / Constructors / Classes
 // =================
 
-function Book(id, title, author, pages, read) {
+function Book(id, title, author, pages, readValue) {
     if (!new.target) {
         throw Error("You must use the 'new' operator to call the constructor");
     }
@@ -41,18 +36,27 @@ function Book(id, title, author, pages, read) {
     this.title = title;
     this.author = author;
     this.pages = pages;
-    read === false ? this.read = "not read yet" : this.read = "already been read"
+    // map the string to a more user-friendly representation
+    this.read = readValue === "not-read" ? "not read yet" : "already been read";
 }
 
 Book.prototype.info = function () {
-    return this.title + " by " + this.author + ", " + this.pages + " pages, " + read;
+    return this.title + " by " + this.author + ", " + this.pages + " pages, " + this.read;
 }
+
+// =================
+// Data / State
+// =================
+const myLibrary = [];
+
 
 // =================
 // Domain-Specific Functions
 // =================
-function addBookToLibrary(title, author, pages, read) {
-    myLibrary.push(new Book(generateUUID(), title, author, pages, read));
+function addBookToLibrary(title, author, pages, readValue) {
+    let newBook = new Book(generateUUID(), title, author, pages, readValue)
+    myLibrary.push(newBook);
+    return newBook;
 }
 
 function displayAllBooks() {
@@ -65,14 +69,14 @@ function displayAllBooks() {
 // DOM Manipulation Functions
 // =================
 
+function populateTableColGroup(obj, colgroup) {
 
-function addTableHeader(obj, thead, table) {
+    // Populate the table colgroup with a number of columns corresponding to the number of book properties
+    Object.keys(obj).forEach(() => colgroup.appendChild(createElement("col")));
+}
+
+function addTableHeader(obj, thead) {
     const newRow = createElement("tr", ["library-head-row"]);
-    const newColGroup = createElement("colgroup");
-
-    // Append a sufficient length colgroup to the table
-    Object.keys(obj).forEach(() => newColGroup.appendChild(createElement("col")));
-    table.insertBefore(newColGroup, table.firstChild);
 
     // Fill out the table header with headings
     let newCell = undefined;
@@ -104,14 +108,44 @@ function addTableRow(obj, tbody) {
 // Main Execution Block / Script Body
 // =================
 const libraryTable = document.querySelector(".library-table");
+const libraryColGroup = document.querySelector(".library-table colgroup")
 const libraryHead = document.querySelector(".library-head")
 const libraryRecords = document.querySelector(".library-records");
 
-addBookToLibrary("The Hobbit", "J.R.R Tolkien", 295, false);
-addBookToLibrary("To Kill a Mockingbird", "Harper Lee", 320, true);
-addBookToLibrary("Of Mice and Men", "John Steinbeck", 107, true);
+addBookToLibrary("The Hobbit", "J.R.R Tolkien", 295, "not-read");
+addBookToLibrary("To Kill a Mockingbird", "Harper Lee", 320, "has-read");
+addBookToLibrary("Of Mice and Men", "John Steinbeck", 107, "has-read");
 
 if (myLibrary.length > 0) {
-    addTableHeader(myLibrary[0], libraryHead, libraryTable)
+    populateTableColGroup(myLibrary[0], libraryColGroup);
+    addTableHeader(myLibrary[0], libraryHead);
     displayAllBooks();
 }
+
+const newBookDialog = document.querySelector(".new-book-dialog");
+const newBookButton = document.querySelector(".new-book-btn");
+const closeButton = document.querySelector(".close-btn");
+
+newBookButton.addEventListener("click", () => {
+    newBookDialog.showModal()
+})
+
+closeButton.addEventListener("click", () => {
+    newBookDialog.close();
+})
+
+const form = document.querySelector(".new-book-form");
+
+form.addEventListener("submit", (event) => {
+    event.preventDefault(); // stop default page reload
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries()); // { title: "...", author: "..." }
+
+    // Call your domain-specific function
+    addTableRow(addBookToLibrary(data.title, data.author, data.pages, data.read), libraryRecords);
+
+    form.reset();
+    newBookDialog.close();
+
+}); 
