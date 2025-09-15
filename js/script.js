@@ -40,7 +40,7 @@ function createButton(classNames = [], textContent = "", onClick) {
 // Objects / Constructors / Classes
 // =================
 
-function Book(id, title, author, pages, readValue) {
+/* function Book(id, title, author, pages, readValue) {
     if (!new.target) {
         throw Error("You must use the 'new' operator to call the constructor");
     }
@@ -59,6 +59,29 @@ Book.prototype.toggleRead = function () {
 
 Book.prototype.info = function () {
     return this.title + " by " + this.author + ", " + this.pages + " pages, " + this.read;
+} */
+
+class Book {
+    constructor(id, title, author, pages, readValue) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        // map the string to a more user-friendly representation
+        this.read = readValue === "not-read" ? NOT_READ : HAS_READ;
+    }
+
+    toggleRead() {
+        if (this.read === NOT_READ) {
+            this.read = HAS_READ;
+        } else {
+            this.read = NOT_READ;
+        }
+    }
+
+    info() {
+        return this.title + " by " + this.author + ", " + this.pages + " pages, " + this.read;
+    }
 }
 
 // =================
