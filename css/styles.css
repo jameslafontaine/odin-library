@@ -54,7 +54,6 @@ a {
     text-decoration: none;
 }
 
-
 /* ------------------------------
     Typography
     ------------------------------ */
@@ -92,7 +91,7 @@ h1 {
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     margin-bottom: 2rem;
-    margin-top: 1rem
+    margin-top: 1rem;
 }
 
 .library-table {
@@ -133,4 +132,9 @@ col {
 .toggle-read-btn,
 .delete-book-btn {
     margin-left: 1rem;
+}
+
+/* Form validation */
+form input:invalid {
+    border: 1px solid red;
 }

@@ -25,13 +25,13 @@ function generateUUID() {
 // -----------
 function createElement(tag, classNames = [], textContent = "") {
     const el = document.createElement(tag);
-    classNames.forEach(cls => el.classList.add(cls));
+    classNames.forEach((cls) => el.classList.add(cls));
     el.textContent = textContent;
     return el;
 }
 
 function createButton(classNames = [], textContent = "", onClick) {
-    const btn = createElement("button", classNames, textContent)
+    const btn = createElement("button", classNames, textContent);
     btn.addEventListener("click", onClick);
     return btn;
 }
@@ -89,19 +89,18 @@ class Book {
 // =================
 const myLibrary = [];
 
-
 // =================
 // Domain-Specific Functions
 // =================
 function addBookToLibrary(title, author, pages, readValue) {
-    let newBook = new Book(generateUUID(), title, author, pages, readValue)
+    let newBook = new Book(generateUUID(), title, author, pages, readValue);
     myLibrary.push(newBook);
     return newBook;
 }
 
 function displayAllBooks() {
     for (let book of myLibrary) {
-        addTableRow(book, libraryRecords)
+        addTableRow(book, libraryRecords);
     }
 }
 
@@ -119,7 +118,6 @@ function removeBookFromLibrary(id) {
 // =================
 
 function populateTableColGroup(obj, colgroup) {
-
     // Populate the table colgroup with a number of columns corresponding to the number of book properties
     Object.keys(obj).forEach((key) => colgroup.appendChild(createElement("col", [`${key}-column`])));
 
@@ -160,20 +158,12 @@ function addTableRow(obj, tbody) {
     // Append extra cell for the action buttons and set up event listeners
     newCell = createElement("td", ["action-cell"]);
 
-    const toggleReadButton = createButton(
-        ["toggle-read-btn"],
-        "Toggle Read",
-        () => {
-            obj.toggleRead();
-            updateTableCell(obj, "read");
-        }
-    );
+    const toggleReadButton = createButton(["toggle-read-btn"], "Toggle Read", () => {
+        obj.toggleRead();
+        updateTableCell(obj, "read");
+    });
 
-    const deleteBookButton = createButton(
-        ["delete-book-btn"],
-        "Delete Book",
-        () => removeBookFromLibrary(obj.id)
-    );
+    const deleteBookButton = createButton(["delete-book-btn"], "Delete Book", () => removeBookFromLibrary(obj.id));
 
     newCell.appendChild(toggleReadButton);
     newCell.appendChild(deleteBookButton);
@@ -196,8 +186,8 @@ function removeTableRow(id) {
 // Main Execution Block / Script Body
 // =================
 const libraryTable = document.querySelector(".library-table");
-const libraryColGroup = document.querySelector(".library-table colgroup")
-const libraryHead = document.querySelector(".library-head")
+const libraryColGroup = document.querySelector(".library-table colgroup");
+const libraryHead = document.querySelector(".library-head");
 const libraryRecords = document.querySelector(".library-records");
 
 addBookToLibrary("The Hobbit", "J.R.R Tolkien", 295, "not-read");
@@ -215,26 +205,51 @@ const newBookButton = document.querySelector(".new-book-btn");
 const closeButton = document.querySelector(".close-btn");
 
 newBookButton.addEventListener("click", () => {
-    newBookDialog.showModal()
-})
+    newBookDialog.showModal();
+});
 
 closeButton.addEventListener("click", () => {
     newBookDialog.close();
-})
+});
 
 const form = document.querySelector(".new-book-form");
 
+// Run validation on ALL inputs during submit
 form.addEventListener("submit", (event) => {
-    event.preventDefault(); // stop default page reload
+    // Validate all inputs here
+    form.querySelectorAll("input").forEach(validateInput);
 
+    if (!form.checkValidity()) {
+        event.preventDefault();
+        form.reportValidity();
+        return;
+    }
+
+    // form is valid — your add book logic
+    event.preventDefault();
     const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries()); // { title: "...", author: "..." }
+    const data = Object.fromEntries(formData.entries());
 
-    // Call your domain-specific function
     addTableRow(addBookToLibrary(data.title, data.author, data.pages, data.read), libraryRecords);
-
     form.reset();
     newBookDialog.close();
-
 });
 
+// Update custom validity on input
+form.querySelectorAll("input").forEach((input) => {
+    input.addEventListener("input", () => {
+        validateInput(input);
+    });
+});
+
+// Custom validation function
+function validateInput(input) {
+    input.setCustomValidity("");
+
+    if (!input.value) {
+        input.setCustomValidity(`You must fill out the ${input.name} field!`);
+    }
+}
+const titleInput = document.querySelector("#title");
+const authorInput = document.querySelector("#author");
+const pagesInput = document.querySelector("#pages");
